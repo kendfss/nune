@@ -23,7 +23,7 @@ Go v1.18 is currently only available in beta version, which can be downloaded [h
 After installing Go1.18, simply run this in your terminal...
 
 ```zsh
-go get github.com/mattn/nune
+go get github.com/kendfss/nune
 ```
 
 ... and you're good to Go!
@@ -69,7 +69,7 @@ import (
  "fmt"
  "math"
 
- "github.com/mattn/nune"
+ "github.com/kendfss/nune"
 )
 
 func main() {

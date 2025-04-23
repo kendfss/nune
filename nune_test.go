@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mattn/nune"
+	"github.com/kendfss/nune"
 )
 
 func benchmarkMilli(b *testing.B, f func()) {
