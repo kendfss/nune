@@ -4,10 +4,6 @@
 
 package nune
 
-import (
-	"github.com/vorduin/slices"
-)
-
 // Ravel returns the Tensor's view in its data buffer.
 func (t Tensor[T]) Ravel() []T {
 	return t.data[t.offset : t.offset+t.Numel()]
@@ -29,7 +25,7 @@ func (t Tensor[T]) Numel() int {
 		return 1
 	}
 
-	return int(slices.Prod(t.shape))
+	return int(prod(t.shape))
 }
 
 // Rank returns the Tensor's rank
@@ -40,12 +36,12 @@ func (t Tensor[T]) Rank() int {
 
 // Shape returns a copy of the Tensor's shape.
 func (t Tensor[T]) Shape() []int {
-	return slices.Clone(t.shape)
+	return clone(t.shape)
 }
 
 // Stride returns a copy of the Tensor's stride scheme.
 func (t Tensor[T]) Stride() []int {
-	return slices.Clone(t.stride)
+	return clone(t.stride)
 }
 
 // Stride returns the Tensor's view offset in its data buffer.
@@ -81,7 +77,7 @@ func (t *Tensor[T]) Broadable(shape ...int) bool {
 	var s []int
 
 	if len(t.shape) < len(shape) {
-		s = slices.WithLen[int](len(shape))
+		s = make([]int, len(shape))
 		for i := 0; i < len(shape)-len(t.shape); i++ {
 			s[i] = 1
 		}

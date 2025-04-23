@@ -7,14 +7,13 @@ package nune
 import (
 	"math"
 	"runtime"
-	"github.com/vorduin/slices"
 )
 
 // configStride returns the corresponding stride to the given shape.
 func configStride(shape []int) []int {
 	if len(shape) != 0 {
-		stride := slices.WithLen[int](len(shape))
-		stride[0] = slices.Prod(shape[1:])
+		stride := make([]int, len(shape))
+		stride[0] = prod(shape[1:])
 
 		for i := 1; i < len(shape); i++ {
 			stride[i] = stride[i-1] / shape[i]
@@ -26,7 +25,7 @@ func configStride(shape []int) []int {
 	return nil
 }
 
-// configCPU returns the number of CPU cores to use 
+// configCPU returns the number of CPU cores to use
 // depending on the data's size.
 func configCPU(size int) int {
 	if EnvConfig.NumCPU != 0 {

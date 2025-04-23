@@ -7,8 +7,6 @@ package nune
 import (
 	"math"
 	"reflect"
-
-	"github.com/vorduin/slices"
 )
 
 // From returns a Tensor from the given backing - be it a numeric type,
@@ -75,14 +73,14 @@ func Full[T Number](x T, shape []int) Tensor[T] {
 		}
 	}
 
-	data := slices.WithLen[T](slices.Prod(shape))
+	data := make([]T, prod(shape))
 	for i := 0; i < len(data); i++ {
 		data[i] = T(x)
 	}
 
 	return Tensor[T]{
 		data:   data,
-		shape:  slices.Clone(shape),
+		shape:  clone(shape),
 		stride: configStride(shape),
 	}
 }
@@ -90,14 +88,14 @@ func Full[T Number](x T, shape []int) Tensor[T] {
 // FullLike returns a Tensor full with the given value and
 // resembling the other Tensor's shape.
 func FullLike[T Number, U Number](x T, other Tensor[U]) Tensor[T] {
-	data := slices.WithLen[T](other.Numel())
+	data := make([]T, other.Numel())
 	for i := 0; i < len(data); i++ {
 		data[i] = T(x)
 	}
 
 	return Tensor[T]{
 		data:   data,
-		shape:  slices.Clone(other.shape),
+		shape:  clone(other.shape),
 		stride: configStride(other.shape),
 	}
 }
@@ -116,8 +114,8 @@ func Zeros[T Number](shape ...int) Tensor[T] {
 	}
 
 	return Tensor[T]{
-		data:   slices.WithLen[T](int(slices.Prod(shape))),
-		shape:  slices.Clone(shape),
+		data:   make([]T, int(prod(shape))),
+		shape:  clone(shape),
 		stride: configStride(shape),
 	}
 }
@@ -126,8 +124,8 @@ func Zeros[T Number](shape ...int) Tensor[T] {
 // Tensor's shape.
 func ZerosLike[T Number, U Number](other Tensor[U]) Tensor[T] {
 	return Tensor[T]{
-		data:   slices.WithLen[T](other.Numel()),
-		shape:  slices.Clone(other.shape),
+		data:   make([]T, other.Numel()),
+		shape:  clone(other.shape),
 		stride: configStride(other.shape),
 	}
 }
@@ -161,7 +159,7 @@ func Range[T Number](start, end, step int) Tensor[T] {
 	l := int(math.Floor(d / math.Abs(float64(step)))) // length
 
 	i := 0
-	rng := slices.WithLen[T](l)
+	rng := make([]T, l)
 	for x := 0; x < l; x += 1 {
 		rng[i] = T(start + x*step)
 		i++

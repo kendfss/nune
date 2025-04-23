@@ -6,8 +6,7 @@ package nune
 
 import (
 	"errors"
-
-	"github.com/vorduin/slices"
+	"reflect"
 )
 
 // Cast casts a Tensor's underlying type to the given numeric type.
@@ -23,7 +22,7 @@ func Cast[T Number, V Number](t Tensor[V]) Tensor[T] {
 	}
 
 	dataBuf := t.Ravel()
-	c := slices.WithLen[T](t.Numel())
+	c := make([]T, t.Numel())
 	for i := 0; i < len(c); i++ {
 		c[i] = T(dataBuf[i])
 	}
@@ -47,9 +46,9 @@ func (t Tensor[T]) Clone() Tensor[T] {
 	}
 
 	return Tensor[T]{
-		data:   slices.Clone(t.Ravel()),
-		shape:  slices.Clone(t.shape),
-		stride: slices.Clone(t.stride),
+		data:   clone(t.Ravel()),
+		shape:  clone(t.shape),
+		stride: clone(t.stride),
 	}
 }
 
@@ -78,20 +77,20 @@ func (t Tensor[T]) Reshape(shape ...int) Tensor[T] {
 				return t
 			}
 		}
-		
-		newstride := slices.WithLen[int](len(shape))
+
+		newstride := make([]int, len(shape))
 		if len(shape) <= len(t.shape) {
 			copy(newstride, t.stride[len(t.stride)-len(shape):])
 		} else {
 			copy(newstride[len(shape)-len(t.stride):], t.stride)
-			for i := len(shape)-len(t.stride)-1; i >= 0; i-- {
+			for i := len(shape) - len(t.stride) - 1; i >= 0; i-- {
 				newstride[i] = shape[i+1] * newstride[i+1]
 			}
 		}
 
 		return Tensor[T]{
 			data:   t.data,
-			shape:  slices.Clone(shape),
+			shape:  clone(shape),
 			stride: newstride,
 			offset: t.offset,
 		}
@@ -139,8 +138,8 @@ func (t Tensor[T]) Index(indices ...int) Tensor[T] {
 
 	return Tensor[T]{
 		data:   t.data,
-		shape:  slices.Clone(t.shape[len(indices):]),
-		stride: slices.Clone(t.stride[len(indices):]),
+		shape:  clone(t.shape[len(indices):]),
+		stride: clone(t.stride[len(indices):]),
 		offset: offset,
 	}
 }
@@ -175,14 +174,14 @@ func (t Tensor[T]) Slice(start, end int) Tensor[T] {
 		}
 	}
 
-	shape := slices.WithLen[int](len(t.shape))
+	shape := make([]int, len(t.shape))
 	shape[0] = end - start
 	copy(shape[1:], t.shape[1:])
 
 	return Tensor[T]{
 		data:   t.data,
 		shape:  shape,
-		stride: slices.Clone(t.stride),
+		stride: clone(t.stride),
 		offset: t.offset + start*t.stride[0],
 	}
 }
@@ -209,7 +208,7 @@ func (t Tensor[T]) Broadcast(shape ...int) Tensor[T] {
 	var expandedShape []int
 
 	if len(t.shape) < len(shape) {
-		expandedShape = slices.WithLen[int](len(shape))
+		expandedShape = make([]int, len(shape))
 		for i := 0; i < len(shape)-len(t.shape); i++ {
 			expandedShape[i] = 1
 		}
@@ -221,7 +220,7 @@ func (t Tensor[T]) Broadcast(shape ...int) Tensor[T] {
 	expandedStride := configStride(expandedShape)
 	newStride := configStride(shape)
 
-	data := slices.WithLen[T](int(slices.Prod(shape)))
+	data := make([]T, int(prod(shape)))
 
 	var expansion, stride int = 1, newStride[0]
 
@@ -246,8 +245,8 @@ func (t Tensor[T]) Broadcast(shape ...int) Tensor[T] {
 	}
 
 	return Tensor[T]{
-		data: data,
-		shape: slices.Clone(shape),
+		data:   data,
+		shape:  clone(shape),
 		stride: newStride,
 	}
 }
@@ -314,13 +313,13 @@ func (t Tensor[T]) Repeat(n int) Tensor[T] {
 
 	numel := t.Numel()
 	dataBuf := t.Ravel()
-	data := slices.WithLen[T](n * numel)
+	data := make([]T, n*numel)
 	for i := 0; i < n; i++ {
 		copy(data[i*numel:i*numel+numel], dataBuf)
 	}
 
-	shape := slices.WithLen[int](len(t.shape) + 1)
-	stride := slices.WithLen[int](len(t.stride) + 1)
+	shape := make([]int, len(t.shape)+1)
+	stride := make([]int, len(t.stride)+1)
 
 	shape[0] = n
 	copy(shape[1:], t.shape)
@@ -328,8 +327,8 @@ func (t Tensor[T]) Repeat(n int) Tensor[T] {
 	copy(stride[1:], t.stride)
 
 	return Tensor[T]{
-		data: data,
-		shape: shape,
+		data:   data,
+		shape:  shape,
 		stride: stride,
 	}
 }
@@ -354,11 +353,11 @@ func (t Tensor[T]) Permute(axes ...int) Tensor[T] {
 		}
 	}
 
-	shapeCopy := slices.Clone(t.shape)
-	strideCopy := slices.Clone(t.stride)
+	shapeCopy := clone(t.shape)
+	strideCopy := clone(t.stride)
 
-	newshape := slices.WithLen[int](len(t.shape))
-	newstride := slices.WithLen[int](len(t.stride))
+	newshape := make([]int, len(t.shape))
+	newstride := make([]int, len(t.stride))
 
 	for i, axis := range axes {
 		err := verifyAxisBounds(axis, len(t.shape))
@@ -376,8 +375,8 @@ func (t Tensor[T]) Permute(axes ...int) Tensor[T] {
 	}
 
 	return Tensor[T]{
-		data: t.data,
-		shape: newshape,
+		data:   t.data,
+		shape:  newshape,
 		stride: newstride,
 		offset: t.offset,
 	}
@@ -412,7 +411,7 @@ func (t Tensor[T]) Cat(other Tensor[T], axis int) Tensor[T] {
 		}
 	}
 
-	if !slices.Equal(t.shape[:axis], other.shape[:axis]) || !slices.Equal(t.shape[axis+1:], other.shape[axis+1:]) {
+	if !reflect.DeepEqual(t.shape[:axis], other.shape[:axis]) || !reflect.DeepEqual(t.shape[axis+1:], other.shape[axis+1:]) {
 		if EnvConfig.Interactive {
 			panic("nune: tensors' shapes do not allow concatenating them")
 		} else {
@@ -421,14 +420,14 @@ func (t Tensor[T]) Cat(other Tensor[T], axis int) Tensor[T] {
 		}
 	}
 
-	newshape := slices.Clone(t.shape)
+	newshape := clone(t.shape)
 	newshape[axis] += other.shape[axis]
 	newstride := configStride(newshape)
 
 	ts := t.stride[axis]
 	os := other.stride[axis]
 	ns := newstride[axis]
-	data := slices.WithLen[T](t.Numel() + other.Numel())
+	data := make([]T, t.Numel()+other.Numel())
 
 	// how do I come up with these algorithms...
 	for i := 0; i < t.Numel()/(ts*t.shape[axis]); i++ {
@@ -440,8 +439,8 @@ func (t Tensor[T]) Cat(other Tensor[T], axis int) Tensor[T] {
 	}
 
 	return Tensor[T]{
-		data: data,
-		shape: newshape,
+		data:   data,
+		shape:  newshape,
 		stride: newstride,
 	}
 }
@@ -511,8 +510,8 @@ func (t Tensor[T]) Squeeze(axis int) Tensor[T] {
 		}
 	}
 
-	newshape := slices.WithLen[int](len(t.shape) - 1)
-	newstride := slices.WithLen[int](len(t.stride) - 1)
+	newshape := make([]int, len(t.shape)-1)
+	newstride := make([]int, len(t.stride)-1)
 
 	copy(newshape[:axis], t.shape[:axis])
 	copy(newshape[axis:], t.shape[axis+1:])
@@ -520,8 +519,8 @@ func (t Tensor[T]) Squeeze(axis int) Tensor[T] {
 	copy(newstride[axis:], t.stride[axis+1:])
 
 	return Tensor[T]{
-		data: t.data,
-		shape: newshape,
+		data:   t.data,
+		shape:  newshape,
 		stride: newstride,
 		offset: t.offset,
 	}
@@ -547,8 +546,8 @@ func (t Tensor[T]) Unsqueeze(axis int) Tensor[T] {
 		}
 	}
 
-	newshape := slices.WithLen[int](len(t.shape) + 1)
-	newstride := slices.WithLen[int](len(t.stride) + 1)
+	newshape := make([]int, len(t.shape)+1)
+	newstride := make([]int, len(t.stride)+1)
 
 	copy(newshape[:axis], t.shape[:axis])
 	copy(newstride[:axis], t.stride[:axis])
@@ -563,8 +562,8 @@ func (t Tensor[T]) Unsqueeze(axis int) Tensor[T] {
 	}
 
 	return Tensor[T]{
-		data: t.data,
-		shape: newshape,
+		data:   t.data,
+		shape:  newshape,
 		stride: newstride,
 		offset: t.offset,
 	}

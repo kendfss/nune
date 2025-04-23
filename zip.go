@@ -5,8 +5,8 @@
 package nune
 
 import (
+	"reflect"
 	"sync"
-	"github.com/vorduin/slices"
 )
 
 // handleZip processes an elementwise operation accordingly.
@@ -38,7 +38,7 @@ func midwayBroadcast(s1, s2 []int) []int {
 	var s []int
 
 	if len(s1) < len(s2) {
-		s = slices.WithLen[int](len(s2))
+		s = make([]int, len(s2))
 		for i := 0; i < len(s2)-len(s1); i++ {
 			s[i] = 1
 		}
@@ -77,16 +77,16 @@ func (t Tensor[T]) Zip(other any, f func(T, T) T) Tensor[T] {
 		}
 	}
 
-	if !slices.Equal(t.shape, o.shape) {
-		if s := midwayBroadcast(o.shape, t.shape); t.Broadable(s...) && !slices.Equal(s, t.shape) {
+	if !reflect.DeepEqual(t.shape, o.shape) {
+		if s := midwayBroadcast(o.shape, t.shape); t.Broadable(s...) && !reflect.DeepEqual(s, t.shape) {
 			t = t.Broadcast(s...)
 		}
 
-		if s := midwayBroadcast(t.Shape(), o.Shape()); o.Broadable(s...) && !slices.Equal(s, o.shape) {
+		if s := midwayBroadcast(t.Shape(), o.Shape()); o.Broadable(s...) && !reflect.DeepEqual(s, o.shape) {
 			o = o.Broadcast(s...)
 		}
 
-		if !slices.Equal(t.shape, o.shape) {
+		if !reflect.DeepEqual(t.shape, o.shape) {
 			if EnvConfig.Interactive {
 				panic(ErrNotBroadable)
 			} else {

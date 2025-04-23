@@ -6,8 +6,6 @@ package nune
 
 import (
 	"reflect"
-
-	"github.com/vorduin/slices"
 )
 
 // unwrapAnySlice attempts to recursively unwrap a slice
@@ -31,7 +29,7 @@ func unwrapAny[T Number](s []any, shape []int) ([]T, []int, error) {
 			}
 		}
 
-		p := slices.WithLen[any](len(s) * d)
+		p := make([]any, len(s)*d)
 		for i := 0; i < len(s); i++ {
 			r := reflect.ValueOf(s[i])
 			for j := 0; j < d; j++ {
@@ -93,7 +91,7 @@ func anyToNumeric[T Number](s ...any) []T {
 
 // numericToNumeric casts a numeric type to another numeric type.
 func numericToNumeric[T, U Number](s []any) []T {
-	ns := slices.WithLen[T](len(s))
+	ns := make([]T, len(s))
 	for i := 0; i < len(s); i++ {
 		ns[i] = T(s[i].(U))
 	}
@@ -104,31 +102,31 @@ func numericToNumeric[T, U Number](s []any) []T {
 // anyToTensor attempts to cast an interface
 // to a Tensor of the given numeric type.
 func anyToTensor[T Number](a any) (Tensor[T], bool) {
-	switch a.(type) {
+	switch a := a.(type) {
 	case Tensor[int]:
-		return Cast[T](a.(Tensor[int])), true
+		return Cast[T](a), true
 	case Tensor[int8]:
-		return Cast[T](a.(Tensor[int8])), true
+		return Cast[T](a), true
 	case Tensor[int16]:
-		return Cast[T](a.(Tensor[int16])), true
+		return Cast[T](a), true
 	case Tensor[int32]:
-		return Cast[T](a.(Tensor[int32])), true
+		return Cast[T](a), true
 	case Tensor[int64]:
-		return Cast[T](a.(Tensor[int64])), true
+		return Cast[T](a), true
 	case Tensor[uint]:
-		return Cast[T](a.(Tensor[uint])), true
+		return Cast[T](a), true
 	case Tensor[uint8]:
-		return Cast[T](a.(Tensor[uint8])), true
+		return Cast[T](a), true
 	case Tensor[uint16]:
-		return Cast[T](a.(Tensor[uint16])), true
+		return Cast[T](a), true
 	case Tensor[uint32]:
-		return Cast[T](a.(Tensor[uint32])), true
+		return Cast[T](a), true
 	case Tensor[uint64]:
-		return Cast[T](a.(Tensor[uint64])), true
+		return Cast[T](a), true
 	case Tensor[float32]:
-		return Cast[T](a.(Tensor[float32])), true
+		return Cast[T](a), true
 	case Tensor[float64]:
-		return Cast[T](a.(Tensor[float64])), true
+		return Cast[T](a), true
 	default:
 		return Tensor[T]{}, false
 	}

@@ -1,5 +1,3 @@
-module github.com/vorduin/nune
+module github.com/mattn/nune
 
-go 1.18
-
-require github.com/vorduin/slices v1.0.5
+go 1.23.0

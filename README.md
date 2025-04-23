@@ -1,8 +1,8 @@
 # Nune
 
-A tensor based numerical engine.
+A tensor based numerical engine
 
-The numerical engine, or nune for short, is a package for performing numerical computation in Go, relying on generic tensors.
+The *nu*merical engi*ne*, or nune for short, is a package for performing numerical computation in Go, relying on generic tensors.
 This package provides facilities to manipulate and perform various operations on numerical data, and implements a numeric n-dimensional generic Tensor, along with a set of functions to create, manipulate and operate on that Tensor.
 
 ## Table of contents
@@ -23,7 +23,7 @@ Go v1.18 is currently only available in beta version, which can be downloaded [h
 After installing Go1.18, simply run this in your terminal...
 
 ```zsh
-go get github.com/vorduin/nune
+go get github.com/mattn/nune
 ```
 
 ... and you're good to Go!
@@ -69,7 +69,7 @@ import (
  "fmt"
  "math"
 
- "github.com/vorduin/nune"
+ "github.com/mattn/nune"
 )
 
 func main() {
@@ -161,4 +161,4 @@ Limitations that need to be fixed before this is a rock-stable library are the f
 
 ## License
 
-Nune has a BSD-style license, as found in the [LICENSE](https://github.com/vorduin/nune/blob/main/LICENSE) file.
+Nune has a BSD-style license, as found in the [LICENSE](./LICENSE) file.

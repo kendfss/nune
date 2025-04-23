@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vorduin/nune"
+	"github.com/mattn/nune"
 )
 
 func benchmarkMicro(b *testing.B, f func()) {

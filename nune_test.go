@@ -8,21 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/vorduin/nune"
+	"github.com/mattn/nune"
 )
-
-func benchmarkMicro(b *testing.B, f func()) {
-	b.ResetTimer()
-
-	start := time.Now()
-	for i := 0; i < b.N; i++ {
-		f()
-	}
-	execTime := time.Since(start)
-
-	b.ReportMetric(0, "ns/op")
-	b.ReportMetric((1e6*execTime.Seconds())/float64(b.N), "μs/op")
-}
 
 func benchmarkMilli(b *testing.B, f func()) {
 	b.ResetTimer()
@@ -52,7 +39,7 @@ func benchmarkOp(b *testing.B, f func()) {
 
 	b.Run("1e7Float64ProcsN", func(b *testing.B) {
 		nune.EnvConfig.NumCPU = 0
-		
+
 		benchmarkMilli(b, func() {
 			f()
 		})
